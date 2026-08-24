@@ -18,22 +18,22 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Accept Android SDK licenses and install build-tools
-      run: |
-        yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
     - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      run: chmod +x gradlew
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon --stacktrace
+    - name: Build with Gradle
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      run: ./gradlew :doom:assembleDebug --stacktrace --no-daemon
 
     - name: Upload APK
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: gzdoom-android-apk
-        path: |
-          **/build/outputs/apk/debug/*.apk
+        path: doom/build/outputs/apk/debug/*.apk
+        
