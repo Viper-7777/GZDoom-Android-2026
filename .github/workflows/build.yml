@@ -18,23 +18,18 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Set up Android SDK & NDK
+    - name: Setup Android SDK
       uses: android-actions/setup-android@v3
-      with:
-        packages: 'platforms;android-36 build-tools;36.0.0 ndk;27.0.12077973'
 
     - name: Accept Licenses
       run: yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
 
-    - name: Build Debug APK
-      env:
-        ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.12077973
-      run: ./gradlew :doom:assembleDebug --stacktrace --no-daemon
+    - name: Build APK
+      run: gradle :doom:assembleDebug --stacktrace
 
     - name: Upload APK
       if: always()
